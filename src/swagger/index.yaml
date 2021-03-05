@@ -1,0 +1,403 @@
+openapi: 3.0.0
+info:
+  description: |
+    This is the API definition of FlowerStore
+  version: "1.0.0"
+  title: FlowerStore
+tags:
+  - name: order
+    description: Order-related endpoints
+  - name: product
+    description: Product-related endpoints
+  - name: recommendation
+    description: Recommendation-related endpoint
+paths:
+  /api/v1/orders:
+    get:
+      tags:
+        - order
+      summary: Retrieves a list of orders
+      operationId: listOrders
+      parameters:
+        - name: status
+          in: query
+          description: Filter orders by status
+          required: false
+          schema:
+            $ref: '#/components/schemas/StatusEnum'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+    post:
+      tags:
+        - order
+      summary: Create an order
+      operationId: createOrder
+      requestBody:
+        $ref: '#/components/requestBodies/CreateOrderRequestBody'
+      responses:
+        '201':
+          description: Order successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request
+        '409':
+          description: Order cannot be fulfilled
+  '/api/v1/orders/{orderId}':
+    put:
+      tags:
+        - order
+      summary: Update an order
+      operationId: updateOrder
+      parameters:
+        - $ref: '#/components/parameters/orderIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateOrderRequestBody'
+      responses:
+        '200':
+          description: Order successfully updated
+        '400':
+          description: Bad request
+        '404':
+          description: Order not found
+  /api/v1/products:
+    get:
+      tags:
+        - product
+      summary: Retrieves a list of products
+      operationId: listProducts
+      parameters:
+        - name: available
+          in: query
+          description: Filter products by availability
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+    post:
+      tags:
+        - product
+      summary: Create a product
+      operationId: createProduct
+      requestBody:
+        $ref: '#/components/requestBodies/ProductRequestBody'
+      responses:
+        '201':
+          description: Product successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+  '/api/v1/products/{productId}':
+    put:
+      tags:
+        - product
+      summary: Update a product
+      operationId: updateProduct
+      parameters:
+        - $ref: '#/components/parameters/productIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/ProductRequestBody'
+      responses:
+        '200':
+          description: Product successfully updated
+        '400':
+          description: Bad request
+        '404':
+          description: Product not found
+    delete:
+      tags:
+        - product
+      summary: Delete a product
+      operationId: deleteProduct
+      parameters:
+        - $ref: '#/components/parameters/productIdParam'
+      responses:
+        '204':
+          description: Product successfully deleted
+        '404':
+          description: Product not found
+  /api/v1/recommendations:
+    get:
+      tags:
+        - recommendation
+      summary: Retrieves a list of recommendations
+      operationId: listRecommendations
+      parameters:
+        - $ref: '#/components/parameters/occasionParam'
+        - $ref: '#/components/parameters/colorParam'
+        - $ref: '#/components/parameters/priceRangeParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+components:
+  parameters:
+    orderIdParam:
+      name: orderId
+      in: path
+      description: Id of the order
+      required: true
+      schema:
+        type: string
+    productIdParam:
+      name: productId
+      in: path
+      description: Id of the product
+      required: true
+      schema:
+        type: string
+    occasionParam:
+      name: occasions
+      in: query
+      description: Filter flowers by occasion type
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/OccasionEnum'
+    colorParam:
+      name: colors
+      in: query
+      description: Filter flowers by colors
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/ColorEnum'
+    priceRangeParam:
+      name: priceRange
+      in: query
+      description: Filter flowers within a price range
+      required: false
+      schema:
+        type: object
+        properties:
+          min:
+            type: integer
+            description: Min price range
+          max:
+            type: integer
+            description: Max price range
+  requestBodies:
+    CreateOrderRequestBody:
+      description: Request body to create an order
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderInfo'
+    UpdateOrderRequestBody:
+      description: Request body to update an order
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/StatusEnum'
+              - $ref: '#/components/schemas/OrderInfo'
+    ProductRequestBody:
+      description: Request body to create or update a product
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProductInfo'
+  schemas:
+    OrderInfo:
+      type: object
+      properties:
+        shippingOptions:
+          $ref: '#/components/schemas/ShippingOptions'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        packagingType:
+          type: string
+          description: Packaging type
+          enum: 
+            - raw
+            - bouquet
+            - box
+            - potted
+            - wreath
+          default: bouquet
+    ShippingOptions:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: Customer name of the order
+        phoneNumber:
+          type: integer
+          pattern: '^\d{10}$'
+          description: Customer phone number (10 digits only)
+        date:
+          type: string
+          format: date-time
+          description: Shipping date
+        type:
+          type: string
+          description: Shipping method type
+          enum:
+            - delivery
+            - pickup
+          default: pickup 
+      discriminator:
+        propertyName: type
+        mapping:
+          delivery: '#/components/schemas/OrderDelivery'
+          pickup: '#/components/schemas/OrderPickup'
+    OrderDelivery:
+      allOf:
+        - $ref: '#/components/schemas/ShippingOptions'
+        - type: object
+          properties:
+            address:
+              type: string
+    OrderPickup:
+      $ref: '#/components/schemas/ShippingOptions'
+    OrderItem:
+      type: object
+      properties:
+        quantity:
+          type: number
+          description: Product quantity
+        productId:
+          type: string
+          description: Product id
+    Order:
+      allOf:
+        - type: object
+          properties:
+            _id:
+              type: string
+              description: Order id
+            createdAt:
+              type: string
+              format: date-time
+              description: Order creation date and time
+            updatedAt:
+              type: string
+              format: date-time
+              description: Last update on the order
+            status:
+              $ref: '#/components/schemas/StatusEnum'
+            totalPrice:
+              type: number
+              description: Order total price
+        - $ref: '#/components/schemas/OrderInfo'
+    ProductInfo:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Product description
+        price:
+          type: integer
+          description: Product price
+        quantity:
+          type: integer
+          description: Product quantity
+        available:
+          type: boolean
+          description: Product availability
+          default: true
+        pictures:
+          type: array
+          items:
+            type: string
+          description: Array of picture URLs  
+        colors: 
+          type: array
+          items: 
+            $ref: '#/components/schemas/ColorEnum'
+        occasions:
+          type: array
+          items:
+            $ref: '#/components/schemas/OccasionEnum'
+    Product:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              description: Product id
+        - $ref: '#/components/schemas/ProductInfo'
+    StatusEnum:
+      type: string      
+      description: Order status 
+      enum:
+        - created
+        - confirmed
+        - processing
+        - completed
+        - cancelled
+      default: created  
+    ColorEnum:
+      type: string
+      enum:
+        - aqua
+        - beige
+        - blue
+        - brown
+        - coral
+        - gray
+        - green
+        - hotpink
+        - ivory
+        - olive
+        - orange
+        - pink
+        - purple
+        - red
+        - salmon
+        - violet
+        - white
+        - yellow
+    OccasionEnum:
+      type: string
+      enum:
+        - wedding
+        - graduation
+        - anniversary
+        - valentine's day
+        - proposal
+        - funeral

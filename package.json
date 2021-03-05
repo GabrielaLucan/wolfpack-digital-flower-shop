@@ -1,0 +1,35 @@
+{
+  "name": "wolfpack-digital-flower-shop",
+  "version": "1.0.0",
+  "description": "Wolfpack digital flower shop APIs",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabrielaLucan/wolfpack-digital-flower-shop.git"
+  },
+  "author": "gabrielalucan9@gmail.com",
+  "license": "Unlicense",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.6.3",
+    "mongoose": "^5.11.15",
+    "nodemon": "^2.0.7",
+    "swagger-mongoose": "^1.1.2",
+    "url": "^0.11.0",
+    "yamljs": "^0.3.0"
+  },
+  "bugs": {
+    "url": "https://github.com/GabrielaLucan/wolfpack-digital-flower-shop/issues"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "homepage": "https://github.com/GabrielaLucan/wolfpack-digital-flower-shop#readme"
+}
